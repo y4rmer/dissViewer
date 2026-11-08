@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="favicon.png" rel="shortcut icon">    
+<title>dissViewer</title>
+
+<style>
+:root {
+    --blue: #087BFF;
+    --darkblue: #0756C9;
+    --pale: #EAF4FF;
+    --text: #202B3C;
+    --muted: #8994A5;
+    --border: #E9EEF5;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: white;
+    color: var(--text);
+    overflow: hidden;
+}
+
+button, input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+#sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 78px;
+    border-right: 1px solid var(--border);
+    background: white;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    display: block;
+}
+
+.brand {
+    position: absolute;
+    top: 20px;
+    left: 25px;
+    z-index: 3;
+    width: 180px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+}
+
+.brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+}
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    align-items: center;
+    width: 100%;
+}
+
+.nav button {
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 15px;
+    background: transparent;
+    color: #65758B;
+    display: grid;
+    place-items: center;
+}
+
+.nav button:hover,
+.nav button.active {
+    color: var(--blue);
+    background: var(--pale);
+}
+
+.nav svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#main {
+    margin-left: 78px;
+    height: 100vh;
+}
+
+.page {
+    display: none;
+    height: 100%;
+    width: 100%;
+}
+
+.page.active {
+    display: block;
+}
+
+/* HOME FEED */
+
+#home {
+    background: #111;
+}
+
+.feed {
+    height: 100%;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+}
+
+.feed::-webkit-scrollbar {
+    display: none;
+}
+
+.post {
+    height: 100%;
+    min-height: 450px;
+    position: relative;
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    background: #111;
+}
+
+.post-image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #111;
+}
+
+.post-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        #0005,
+        transparent 25%,
+        transparent 55%,
+        #000b
+    );
+    pointer-events: none;
+}
+
+.brand {
+    position: absolute;
+    top: 20px;
+    left: 25px;
+    font-size: 21px;
+    font-weight: 900;
+    color: white;
+    z-index: 3;
+    text-shadow: 0 2px 5px #0008;
+}
+
+.brand span {
+    color: #27A4FF;
+}
+
+.post-info {
+    position: absolute;
+    left: 25px;
+    bottom: 25px;
+    right: 95px;
+    color: white;
+    z-index: 3;
+}
+
+.post-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.post-user img {
+    width: 43px;
+    height: 43px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.post-user strong {
+    font-size: 14px;
+}
+
+.post-location {
+    font-size: 12px;
+    color: #ddd;
+    margin-top: 4px;
+}
+
+.post-description {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.post-tags {
+    font-size: 13px;
+    color: #B8D9FF;
+}
+
+.post-actions {
+    position: absolute;
+    right: 23px;
+    bottom: 35px;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+    align-items: center;
+    color: white;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.action-btn svg {
+    width: 29px;
+    height: 29px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.action-btn.disliked svg {
+    fill: #168BFF;
+    stroke: #168BFF;
+}
+
+.action-btn small {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.action-btn:disabled {
+    opacity: .55;
+}
+
+/* HEADERS */
+
+.page-header {
+    height: 72px;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+}
+
+.page-header h2 {
+    color: var(--blue);
+    font-size: 23px;
+}
+
+.page-content {
+    height: calc(100% - 72px);
+    overflow-y: auto;
+}
+
+/* SEARCH */
+
+.search-area {
+    max-width: 750px;
+    padding: 25px;
+    margin: auto;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #F4F7FB;
+}
+
+.search-box svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: var(--muted);
+}
+
+.search-box input {
+    flex: 1;
+    height: 52px;
+    outline: none;
+    border: none;
+    background: transparent;
+}
+
+.result-heading {
+    margin: 25px 0 15px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* GRIDS */
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+}
+
+.grid-item {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+    background: #EFF4FA;
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: .3s;
+}
+
+.grid-item:hover img {
+    transform: scale(1.06);
+}
+
+.grid-overlay {
+    position: absolute;
+    inset: 0;
+    background: #0006;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+    font-weight: bold;
+}
+
+.grid-item:hover .grid-overlay {
+    opacity: 1;
+}
+
+.discover-heading {
+    padding: 25px;
+}
+
+.discover-heading h3 {
+    font-size: 18px;
+}
+
+.discover-heading p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+/* PROFILE */
+
+.profile-container {
+    max-width: 850px;
+    margin: auto;
+}
+
+.profile-details {
+    padding: 40px 25px;
+    display: flex;
+    align-items: center;
+    gap: 35px;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--pale);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h2 {
+    font-size: 21px;
+}
+
+.profile-username {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 7px 0 15px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 14px;
+}
+
+.profile-stats span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.profile-stats strong {
+    color: var(--text);
+}
+
+.profile-bio {
+    font-size: 13px;
+}
+
+.profile-post-heading {
+    padding: 20px;
+    text-align: center;
+    color: var(--blue);
+    font-weight: bold;
+    font-size: 13px;
+}
+
+#adminPanel {
+    display: none;
+}
+
+#adminPanel.revealed {
+    display: block;
+}
+
+#profileAvatar {
+    cursor: pointer;
+}
+
+/* ADMIN UPLOAD */
+.admin-panel {
+    margin: 22px 25px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #F8FBFF;
+}
+.admin-panel h3 {
+    color: var(--blue);
+    margin-bottom: 12px;
+}
+.admin-panel p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+.admin-panel input, .admin-panel textarea {
+    display: block;
+    width: 100%;
+    margin: 9px 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+}
+.admin-panel textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+.admin-panel button {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 16px;
+    margin: 5px 7px 5px 0;
+    background: var(--blue);
+    color: white;
+    font-weight: bold;
+}
+.admin-panel button.secondary {
+    background: #EAF1FA;
+    color: var(--text);
+}
+.admin-panel button:disabled {
+    opacity: .55;
+}
+
+/* COMMENTS */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: #0009;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    background: white;
+    width: 100%;
+    max-width: 460px;
+    max-height: 82vh;
+    border-radius: 17px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+    color: var(--blue);
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 25px;
+    color: var(--muted);
+}
+
+.comments-list {
+    flex: 1;
+    min-height: 120px;
+    overflow-y: auto;
+    padding: 18px;
+}
+
+.comment {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    overflow-wrap: anywhere;
+}
+
+.comment strong {
+    margin-right: 7px;
+}
+
+.comment-time {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.comment-form {
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.comment-form input {
+    flex: 1;
+    border: none;
+    outline: none;
+    min-width: 0;
+    padding: 10px;
+}
+
+.comment-form button {
+    border: none;
+    background: var(--blue);
+    color: white;
+    padding: 0 18px;
+    border-radius: 10px;
+}
+
+.status {
+    position: fixed;
+    top: 12px;
+    right: 15px;
+    z-index: 50;
+    background: #EFF6FF;
+    color: var(--blue);
+    padding: 9px 13px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: none;
+}
+
+.status.show {
+    display: block;
+}
+
+.empty {
+    padding: 30px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 14px;
+}
+
+/* PHONE */
+
+@media(max-width:650px) {
+    .logo {
+        display: none;
+    }
+
+    .brand {
+        top: 15px;
+        left: 17px;
+        width: 145px;
+        height: 45px;
+    }
+
+    #sidebar {
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        height: 65px;
+        padding: 0;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        justify-content: center;
+    }
+
+    .nav {
+        flex-direction: row;
+        justify-content: space-around;
+        height: 100%;
+        gap: 0;
+    }
+
+    .nav button {
+        width: 50px;
+        height: 48px;
+    }
+
+    #main {
+        margin-left: 0;
+        height: calc(100dvh - 65px);
+    }
+
+    .post-info {
+        left: 15px;
+        bottom: 20px;
+        right: 80px;
+    }
+
+    .post-actions {
+        right: 13px;
+        bottom: 25px;
+    }
+
+    .brand {
+        left: 17px;
+        top: 15px;
+    }
+
+    .page-header {
+        height: 65px;
+        padding: 0 18px;
+    }
+
+    .page-content {
+        height: calc(100% - 65px);
+    }
+
+    .search-area {
+        padding: 17px;
+    }
+
+    .profile-details {
+        padding: 25px 15px;
+        gap: 16px;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .profile-stats {
+        gap: 12px;
+    }
+
+    .profile-stats span {
+        font-size: 11px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<aside id="sidebar">
+
+    <div class="logo"><img src="favicon.png" /></div>
+
+    <nav class="nav">
+
+        <button class="active" data-page="home" title="Home">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 10.5L12 3l9 7.5V21h-6v-7H9v7H3z"/>
+            </svg>
+        </button>
+
+        <button data-page="search" title="Search">
+            <svg viewBox="0 0 24 24">
+                <circle cx="10.5" cy="10.5" r="7"/>
+                <path d="M16 16l5 5"/>
+            </svg>
+        </button>
+
+        <button data-page="discover" title="Discover">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M15.5 8.5l-2 5-5 2 2-5z"/>
+            </svg>
+        </button>
+
+        <button data-page="profile" title="Profile">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+            </svg>
+        </button>
+
+    </nav>
+
+</aside>
+
+<main id="main">
+
+    <section id="home" class="page active">
+        <div class="feed" id="homeFeed"></div>
+    </section>
+
+    <section id="search" class="page">
+
+        <header class="page-header">
+            <h2>Search</h2>
+        </header>
+
+        <div class="page-content">
+            <div class="search-area">
+
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="10.5" cy="10.5" r="7"/>
+                        <path d="M16 16l5 5"/>
+                    </svg>
+                    <input id="searchInput" placeholder="Search posts, people and tags...">
+                </div>
+
+                <div class="result-heading" id="searchHeading">Explore</div>
+                <div class="photo-grid" id="searchGrid"></div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <section id="discover" class="page">
+
+        <header class="page-header">
+            <h2>Discover</h2>
+        </header>
+
+        <div class="page-content">
+
+            <div class="discover-heading">
+                <h3>Explore the world</h3>
+                <p>Discover moments from the community.</p>
+            </div>
+
+            <div class="photo-grid" id="discoverGrid"></div>
+
+        </div>
+
+    </section>
+
+    <section id="profile" class="page">
+
+        <header class="page-header">
+            <h2>Profile</h2>
+        </header>
+
+        <div class="page-content">
+
+            <div class="profile-container">
+
+                <div class="profile-details">
+
+                    <img id="profileAvatar" class="profile-avatar" src="" alt="">
+
+                    <div class="profile-info">
+                        <h2 id="profileName"></h2>
+                        <div class="profile-username" id="profileUsername"></div>
+
+                        <div class="profile-stats">
+                            <span><strong id="postCount">0</strong> posts</span>
+                            <span><strong>Friends</strong></span>
+                        </div>
+
+                        <p class="profile-bio" id="profileBio"></p>
+                    </div>
+
+                </div>
+
+                <div id="adminPanel" class="admin-panel"></div>
+
+                <div class="profile-post-heading">POSTS</div>
+
+                <div class="photo-grid" id="profileGrid"></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<div class="status" id="status"></div>
+
+<div class="modal" id="commentsModal">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <h3>Comments</h3>
+            <button class="close-modal" id="closeComments">&times;</button>
+        </div>
+
+        <div class="comments-list" id="commentsList"></div>
+
+        <form class="comment-form" id="commentForm">
+            <input id="commentInput" placeholder="Write a comment..." maxlength="500" required>
+            <button type="submit">Post</button>
+        </form>
+
+    </div>
+
+</div>
+
+<!-- SUPABASE JAVASCRIPT CLIENT -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+/* SUPABASE CONFIGURATION */
+
+const SUPABASE_URL = "https://xwpuvlcpswavmsyybdwt.supabase.co";
+const SUPABASE_KEY = "sb_publishable_KiEiS2RICMD411AeMyGfsg_PPqFmGRM";
+
+/* SET THESE TWO VALUES AFTER CREATING YOUR ADMIN USER. */
+const ADMIN_USER_ID = "81800f6a-d68f-4a3a-af6d-22368ec2c68e";
+const ADMIN_UPLOADER_NAME = "Mr  Diss";
+const AVATAR_IMAGE = "assassin.png";
+const STORAGE_BUCKET = "posts";
+
+const SUPABASE_READY = SUPABASE_URL.startsWith("https://") && SUPABASE_KEY.length > 20;
+
+let db = null;
+let userId = null;
+let isAdmin = false;
+let currentPostId = null;
+let posts = [];
+
+const remoteDislikes = {};
+const remoteComments = {};
+const myDislikes = new Set();
+
+const homeFeed = document.getElementById("homeFeed");
+const searchGrid = document.getElementById("searchGrid");
+const discoverGrid = document.getElementById("discoverGrid");
+const profileGrid = document.getElementById("profileGrid");
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+function formatNumber(number) {
+    const value = Number(number) || 0;
+    if (value >= 1000000) return (value / 1000000).toFixed(1) + "M";
+    if (value >= 1000) return (value / 1000).toFixed(1) + "K";
+    return String(value);
+}
+
+function showStatus(message) {
+    const status = document.getElementById("status");
+    status.textContent = message;
+    status.classList.add("show");
+    window.clearTimeout(showStatus.timer);
+    showStatus.timer = window.setTimeout(() => status.classList.remove("show"), 3000);
+}
+
+function dislikeCount(post) {
+    return remoteDislikes[post.id] || 0;
+}
+
+function commentCount(post) {
+    return remoteComments[post.id] || 0;
+}
+
+function switchPage(page) {
+    document.querySelectorAll(".nav button").forEach(button => {
+        button.classList.toggle("active", button.dataset.page === page);
+    });
+    document.querySelectorAll(".page").forEach(section => {
+        section.classList.toggle("active", section.id === page);
+    });
+    if (page === "home") homeFeed.scrollTop = 0;
+}
+
+document.querySelectorAll(".nav button").forEach(button => {
+    button.addEventListener("click", () => switchPage(button.dataset.page));
+});
+
+async function initializeDatabase() {
+    if (!SUPABASE_READY) {
+        showStatus("Supabase configuration is missing.");
+        return;
+    }
+    try {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let result = await db.auth.getSession();
+        let session = result.data.session;
+        if (!session) {
+            result = await db.auth.signInAnonymously();
+            if (result.error) throw result.error;
+            session = result.data.session;
+        }
+        if (!session) throw new Error("Could not create a session.");
+        userId = session.user.id;
+        isAdmin = ADMIN_USER_ID !== "PASTE_ADMIN_USER_UUID_HERE" && userId === ADMIN_USER_ID;
+        await loadPostsAndActivity();
+        renderAdminPanel();
+        showStatus("Connected to dissViewer!");
+    } catch (error) {
+        console.error(error);
+        showStatus("Database connection failed. Check Supabase settings.");
+        db = null;
+    }
+}
+
+async function loadPostsAndActivity() {
+    const postResult = await db.from("posts").select("id,image,description,uploader_name,created_at").order("created_at", { ascending: false });
+    if (postResult.error) throw postResult.error;
+    posts = (postResult.data || []).map(post => ({
+        id: String(post.id),
+        image: post.image,
+        description: post.description || "",
+        uploader_name: post.uploader_name || "Unknown"
+    }));
+
+    const [dislikeResult, myResult, commentResult] = await Promise.all([
+        db.from("dislikes").select("post_id,user_id"),
+        db.from("dislikes").select("post_id").eq("user_id", userId),
+        db.from("comments").select("post_id")
+    ]);
+    if (dislikeResult.error) throw dislikeResult.error;
+    if (myResult.error) throw myResult.error;
+    if (commentResult.error) throw commentResult.error;
+
+    Object.keys(remoteDislikes).forEach(key => delete remoteDislikes[key]);
+    Object.keys(remoteComments).forEach(key => delete remoteComments[key]);
+    posts.forEach(post => {
+        remoteDislikes[post.id] = 0;
+        remoteComments[post.id] = 0;
+    });
+    dislikeResult.data.forEach(item => {
+        if (remoteDislikes[item.post_id] !== undefined) remoteDislikes[item.post_id]++;
+    });
+    myDislikes.clear();
+    myResult.data.forEach(item => myDislikes.add(item.post_id));
+    commentResult.data.forEach(item => {
+        if (remoteComments[item.post_id] !== undefined) remoteComments[item.post_id]++;
+    });
+    renderAll();
+}
+
+function renderAll() {
+    renderHome();
+    renderDiscover();
+    renderSearch(document.getElementById("searchInput").value);
+    renderProfile();
+}
+
+function renderHome() {
+    if (!posts.length) {
+        homeFeed.innerHTML = '<div class="empty">No posts yet. New pictures will appear here.</div>';
+        return;
+    }
+    homeFeed.innerHTML = posts.map(post => {
+        const disliked = myDislikes.has(post.id);
+        return `
+            <article class="post" id="post-${escapeHTML(post.id)}">
+                <img class="post-image" src="${escapeHTML(post.image)}" alt="${escapeHTML(post.description)}" loading="lazy">
+                <div class="post-gradient"></div>
+                <div class="brand"><img src="dissViewer.png" alt="dissViewer"></div>
+                <div class="post-info">
+                    <div class="post-user">
+                        <img src="${escapeHTML(AVATAR_IMAGE)}" alt="">
+                        <div><strong>${escapeHTML(post.uploader_name)}</strong></div>
+                    </div>
+                    <div class="post-description">${escapeHTML(post.description)}</div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn dislike-btn ${disliked ? "disliked" : ""}" data-id="${escapeHTML(post.id)}" ${!db ? "disabled" : ""}>
+                        <svg viewBox="0 0 24 24"><path d="M10 15v5l-5-5-4-1V4h13l4 2v7l-3 2z"/><path d="M18 6l4-2v12l-4-2"/></svg>
+                        <small>${formatNumber(dislikeCount(post))}</small>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="${escapeHTML(post.id)}">
+                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.5 9.5 0 0 1-4-.9L3 21l1.5-4.5A8.4 8.4 0 1 1 21 11.5z"/></svg>
+                        <small>${formatNumber(commentCount(post))}</small>
+                    </button>
+                    <button class="action-btn share-btn" data-id="${escapeHTML(post.id)}">
+                        <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+                        <small>Share</small>
+                    </button>
+                </div>
+            </article>`;
+    }).join("");
+    attachPostActions();
+}
+
+async function toggleDislike(id, button) {
+    if (!db || !userId) return showStatus("Could not connect to Supabase.");
+    button.disabled = true;
+    try {
+        if (myDislikes.has(id)) {
+            const result = await db.from("dislikes").delete().eq("post_id", id).eq("user_id", userId);
+            if (result.error) throw result.error;
+            myDislikes.delete(id);
+            remoteDislikes[id] = Math.max(0, (remoteDislikes[id] || 0) - 1);
+        } else {
+            const result = await db.from("dislikes").insert({ post_id: id, user_id: userId });
+            if (result.error) throw result.error;
+            myDislikes.add(id);
+            remoteDislikes[id] = (remoteDislikes[id] || 0) + 1;
+        }
+        button.classList.toggle("disliked", myDislikes.has(id));
+        const post = posts.find(item => item.id === id);
+        button.querySelector("small").textContent = formatNumber(dislikeCount(post));
+    } catch (error) {
+        console.error(error);
+        showStatus("Could not save dislike.");
+    }
+    button.disabled = false;
+}
+
+function attachPostActions() {
+    document.querySelectorAll(".dislike-btn").forEach(button => {
+        button.addEventListener("click", () => toggleDislike(button.dataset.id, button));
+    });
+    document.querySelectorAll(".comment-btn").forEach(button => {
+        button.addEventListener("click", () => openComments(button.dataset.id));
+    });
+    document.querySelectorAll(".share-btn").forEach(button => {
+        button.addEventListener("click", async () => {
+            const post = posts.find(item => item.id === button.dataset.id);
+            if (!post) return;
+            const shareUrl = location.href.split("#")[0] + "#post-" + post.id;
+            try {
+                if (navigator.share) await navigator.share({ title: "dissViewer", text: post.description, url: shareUrl });
+                else if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(shareUrl);
+                    showStatus("Post link copied!");
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    });
+}
+
+async function openComments(id) {
+    currentPostId = id;
+    const list = document.getElementById("commentsList");
+    list.innerHTML = '<div class="empty">Loading comments...</div>';
+    document.getElementById("commentsModal").classList.add("show");
+    if (!db) {
+        list.innerHTML = '<div class="empty">Connect to Supabase to view comments.</div>';
+        return;
+    }
+    const result = await db.from("comments").select("username,body,created_at").eq("post_id", id).order("created_at", { ascending: true });
+    if (result.error) {
+        console.error(result.error);
+        list.innerHTML = '<div class="empty">Could not load comments.</div>';
+        return;
+    }
+    list.innerHTML = "";
+    if (!result.data.length) list.innerHTML = '<div class="empty">No comments yet. Start the conversation!</div>';
+    result.data.forEach(comment => {
+        const div = document.createElement("div");
+        div.className = "comment";
+        const name = document.createElement("strong");
+        name.textContent = comment.username || "Guest";
+        const message = document.createElement("span");
+        message.textContent = comment.body;
+        div.appendChild(name);
+        div.appendChild(message);
+        if (comment.created_at) {
+            const time = document.createElement("small");
+            time.className = "comment-time";
+            time.textContent = new Date(comment.created_at).toLocaleString();
+            div.appendChild(time);
+        }
+        list.appendChild(div);
+    });
+    list.scrollTop = list.scrollHeight;
+}
+
+document.getElementById("commentForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!db || !userId) return showStatus("Connect to Supabase to comment.");
+    const input = document.getElementById("commentInput");
+    const message = input.value.trim();
+    if (!message || !currentPostId) return;
+    const button = event.submitter;
+    if (button) button.disabled = true;
+    try {
+        const result = await db.from("comments").insert({
+            post_id: currentPostId,
+            user_id: userId,
+            username: localStorage.getItem("dv_username") || "Guest",
+            body: message
+        });
+        if (result.error) throw result.error;
+        input.value = "";
+        remoteComments[currentPostId] = (remoteComments[currentPostId] || 0) + 1;
+        const post = posts.find(item => item.id === currentPostId);
+        const commentButton = document.querySelector(`.comment-btn[data-id="${CSS.escape(currentPostId)}"]`);
+        if (commentButton && post) commentButton.querySelector("small").textContent = formatNumber(commentCount(post));
+        await openComments(currentPostId);
+    } catch (error) {
+        console.error(error);
+        showStatus("Could not save comment. Check the comments table policies.");
+    }
+    if (button) button.disabled = false;
+});
+
+document.getElementById("closeComments").onclick = () => document.getElementById("commentsModal").classList.remove("show");
+document.getElementById("commentsModal").addEventListener("click", event => {
+    if (event.target.id === "commentsModal") event.currentTarget.classList.remove("show");
+});
+
+function createGridItem(post) {
+    return `<div class="grid-item" data-id="${escapeHTML(post.id)}">
+        <img src="${escapeHTML(post.image)}" alt="${escapeHTML(post.description)}" loading="lazy">
+        <div class="grid-overlay"><span>▼ ${formatNumber(dislikeCount(post))}</span><span>● ${formatNumber(commentCount(post))}</span></div>
+    </div>`;
+}
+
+function attachGridActions(container) {
+    container.querySelectorAll(".grid-item").forEach(item => {
+        item.addEventListener("click", () => {
+            const id = item.dataset.id;
+            switchPage("home");
+            const target = document.getElementById("post-" + id);
+            if (target) target.scrollIntoView({ behavior: "smooth" });
+        });
+    });
+}
+
+function renderDiscover() {
+    discoverGrid.innerHTML = posts.length ? posts.map(createGridItem).join("") : '<div class="empty">Nothing to discover yet.</div>';
+    attachGridActions(discoverGrid);
+}
+
+function renderSearch(query = "") {
+    const term = query.toLowerCase().trim();
+    const results = posts.filter(post => [post.uploader_name, post.description].join(" ").toLowerCase().includes(term));
+    document.getElementById("searchHeading").textContent = term ? results.length + " results" : "Explore dissViewer";
+    searchGrid.innerHTML = results.length ? results.map(createGridItem).join("") : '<div class="empty">No matching posts found.</div>';
+    attachGridActions(searchGrid);
+}
+
+document.getElementById("searchInput").addEventListener("input", event => renderSearch(event.target.value));
+
+function renderProfile() {
+    const username = localStorage.getItem("dv_username") || "Guest";
+    document.getElementById("profileAvatar").src = AVATAR_IMAGE;
+    document.getElementById("profileName").textContent = isAdmin ? ADMIN_UPLOADER_NAME : username;
+    document.getElementById("profileUsername").textContent = isAdmin ? "Administrator" : "@" + username;
+    document.getElementById("profileBio").textContent = isAdmin ? "Managing the dissViewer community." : "A member of the dissViewer community.";
+    const ownPosts = isAdmin ? posts.filter(post => post.uploader_name.toLowerCase() === ADMIN_UPLOADER_NAME.toLowerCase()) : [];
+    document.getElementById("postCount").textContent = ownPosts.length;
+    profileGrid.innerHTML = ownPosts.length ? ownPosts.map(createGridItem).join("") : '<div class="empty">Your posts will appear here.</div>';
+    attachGridActions(profileGrid);
+}
+
+function renderAdminPanel() {
+    const panel = document.getElementById("adminPanel");
+    if (!db) {
+        panel.innerHTML = '<h3>Account</h3><p>Connect to Supabase to continue.</p>';
+        return;
+    }
+    if (!isAdmin) {
+        panel.innerHTML = `
+            <h3>Administrator sign in</h3>
+            <p>Only the site owner can publish pictures. Friends do not need to sign in.</p>
+            <form id="adminLoginForm">
+                <input id="adminEmail" type="email" placeholder="Admin email" autocomplete="username" required>
+                <input id="adminPassword" type="password" placeholder="Admin password" autocomplete="current-password" required>
+                <button type="submit">Sign in</button>
+            </form>`;
+        document.getElementById("adminLoginForm").addEventListener("submit", adminLogin);
+        return;
+    }
+    panel.innerHTML = `
+        <h3>Publish a picture</h3>
+        <p>You are signed in as the administrator. Uploaded pictures will appear in the feed for everyone.</p>
+        <form id="uploadForm">
+            <input id="uploadImage" type="file" accept="image/*" required>
+            <textarea id="uploadDescription" maxlength="2000" placeholder="Write a description..." required></textarea>
+            <input id="uploadName" type="text" maxlength="60" value="${escapeHTML(ADMIN_UPLOADER_NAME)}" placeholder="Uploader name" required>
+            <button id="uploadButton" type="submit">Upload post</button>
+            <button class="secondary" id="adminLogout" type="button">Sign out</button>
+        </form>`;
+    document.getElementById("uploadForm").addEventListener("submit", uploadPost);
+    document.getElementById("adminLogout").addEventListener("click", adminLogout);
+}
+
+async function adminLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById("adminEmail").value.trim();
+    const password = document.getElementById("adminPassword").value;
+    try {
+        const result = await db.auth.signInWithPassword({ email, password });
+        if (result.error) throw result.error;
+        userId = result.data.user.id;
+        isAdmin = ADMIN_USER_ID !== "PASTE_ADMIN_USER_UUID_HERE" && userId === ADMIN_USER_ID;
+        if (!isAdmin) {
+            await db.auth.signOut();
+            userId = null;
+            await db.auth.signInAnonymously();
+            showStatus("This account is not configured as the administrator.");
+        } else {
+            showStatus("Administrator signed in.");
+        }
+        await initializeSessionRefresh();
+    } catch (error) {
+        console.error(error);
+        showStatus("Sign in failed. Check your email and password.");
+    }
+}
+
+async function initializeSessionRefresh() {
+    const result = await db.auth.getSession();
+    userId = result.data.session?.user?.id || null;
+    isAdmin = Boolean(userId && ADMIN_USER_ID !== "PASTE_ADMIN_USER_UUID_HERE" && userId === ADMIN_USER_ID);
+    await loadPostsAndActivity();
+    renderAdminPanel();
+}
+
+async function adminLogout() {
+    try {
+        await db.auth.signOut();
+        const result = await db.auth.signInAnonymously();
+        if (result.error) throw result.error;
+        userId = result.data.user.id;
+        isAdmin = false;
+        await loadPostsAndActivity();
+        renderAdminPanel();
+        showStatus("Signed out. You are viewing as a guest.");
+    } catch (error) {
+        console.error(error);
+        showStatus("Could not sign out.");
+    }
+}
+
+async function uploadPost(event) {
+    event.preventDefault();
+    if (!isAdmin || userId !== ADMIN_USER_ID) return showStatus("Administrator access required.");
+    const fileInput = document.getElementById("uploadImage");
+    const description = document.getElementById("uploadDescription").value.trim();
+    const uploaderName = document.getElementById("uploadName").value.trim();
+    const file = fileInput.files[0];
+    if (!file || !description || !uploaderName) return showStatus("Choose an image and complete all fields.");
+    if (!file.type.startsWith("image/")) return showStatus("Please choose an image file.");
+    const button = document.getElementById("uploadButton");
+    button.disabled = true;
+    button.textContent = "Uploading...";
+    const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const objectPath = `${crypto.randomUUID()}.${extension || "jpg"}`;
+    const postId = crypto.randomUUID();
+    try {
+        const uploadResult = await db.storage.from(STORAGE_BUCKET).upload(objectPath, file, { contentType: file.type, upsert: false });
+        if (uploadResult.error) throw uploadResult.error;
+        const publicResult = db.storage.from(STORAGE_BUCKET).getPublicUrl(objectPath);
+        const imageUrl = publicResult.data.publicUrl;
+        const insertResult = await db.from("posts").insert({
+            id: postId,
+            image: imageUrl,
+            description: description,
+            uploader_name: uploaderName
+        });
+        if (insertResult.error) {
+            await db.storage.from(STORAGE_BUCKET).remove([objectPath]);
+            throw insertResult.error;
+        }
+        document.getElementById("uploadForm").reset();
+        document.getElementById("uploadName").value = ADMIN_UPLOADER_NAME;
+        await loadPostsAndActivity();
+        renderAdminPanel();
+        showStatus("Your post has been published!");
+    } catch (error) {
+        console.error(error);
+        showStatus("Upload failed. Check the posts table and Storage policies.");
+        button.disabled = false;
+        button.textContent = "Upload post";
+    }
+}
+
+async function startApp() {
+    let username = localStorage.getItem("dv_username");
+    if (!username) {
+        username = prompt("Choose your dissViewer username:", "Guest");
+        username = (username || "Guest").trim().replace(/[^a-zA-Z0-9_]/g, "").slice(0, 24);
+        if (!username) username = "Guest";
+        localStorage.setItem("dv_username", username);
+    }
+    document.getElementById("profileAvatar").src = AVATAR_IMAGE;
+    await initializeDatabase();
+    renderAdminPanel();
+}
+
+startApp();
+
+let avatarTapCount = 0;
+
+document.getElementById("profileAvatar").addEventListener("click", function() {
+    avatarTapCount++;
+
+    if (avatarTapCount >= 5) {
+        document.getElementById("adminPanel").classList.add("revealed");
+        avatarTapCount = 0;
+    }
+});
+</script>
+
+</body>
+</html>
