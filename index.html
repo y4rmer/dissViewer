@@ -1008,7 +1008,7 @@ async function initializeDatabase() {
 }
 
 async function loadPostsAndActivity() {
-    const postResult = await db.from("posts").select("id,image,description,uploader_name");
+    const postResult = await db.from("posts").select("id,image,description,uploader_name,created_at").order("created_at", { ascending: false });
     if (postResult.error) throw postResult.error;
     posts = (postResult.data || []).map(post => ({
         id: String(post.id),
